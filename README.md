@@ -1,4 +1,5 @@
 # Project to create AWS resoures using terraform and install jenkins using ansible
+
 install terraform and ansible 
 
 install AWS CLI 
@@ -34,12 +35,17 @@ chmod 400 jenkins_key.pem   ---  # change the permissions
 sudo vi /etc/ansible/hosts
 
 [jenkins_servers]
+
 server1 ansible_host= public ip of server1  --- # put public ip here
+
 server2 ansible_host=public ip of server2
  
 [all:vars]
+
 ansible_user=ubuntu
+
 ansible_ssh_private_key_file=path/to/your/pemfile-    ---- # add path of public key
+
 ansible_python_interpreter=/usr/bin/python3
 
 # run ansible play book 
