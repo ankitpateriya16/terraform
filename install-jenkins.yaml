@@ -1,0 +1,46 @@
+---
+- name: Install Jenkins on Ubuntu servers
+  hosts: jenkins-servers
+  become: yes
+  tasks:
+    - name: Install Java (required for Jenkins)
+      apt:
+        name: openjdk-21-jdk
+        state: present
+        update_cache: yes
+ 
+    - name: Add Jenkins apt key
+      apt_key:
+        url: https://pkg.jenkins.io/debian-stable/jenkins.io.key
+        state: present
+ 
+    - name: Add Jenkins apt repository
+      apt_repository:
+        repo: deb https://pkg.jenkins.io/debian-stable binary/
+        state: present
+        filename: jenkins
+ 
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+ 
+    - name: Install Jenkins
+      apt:
+        name: jenkins
+        state: present
+ 
+    - name: Ensure Jenkins is started and enabled
+      systemd:
+        name: jenkins
+        enabled: yes
+        state: started
+      register: jenkins_status
+      failed_when: jenkins_status.failed and "'Unit jenkins.service could not be found.' in jenkins_status.msg"
+ 
+    - name: Print Jenkins service status
+      command: systemctl status jenkins
+      register: result
+      ignore_errors: true
+ 
+    - debug:
+        var: result.stdout_lines
