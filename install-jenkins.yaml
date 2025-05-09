@@ -5,18 +5,72 @@
   tasks:
     - name: Install Java (required for Jenkins)
       apt:
-        name: openjdk-21-jdk
+        name: openjdk-17-jdk
         state: present
         update_cache: yes
  
-    - name: Add Jenkins apt key
-      apt_key:
-        url: https://pkg.jenkins.io/debian-stable/jenkins.io.key
-        state: present
+    - name: Download Jenkins GPG key
+      get_url:
+        url: https://pkg.jenkins.io/debian/jenkins.io-2023.key
+        dest: /usr/share/keyrings/jenkins-keyring.asc
+        mode: '0644'
  
     - name: Add Jenkins apt repository
       apt_repository:
-        repo: deb https://pkg.jenkins.io/debian-stable binary/
+        repo: "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian binary/"
+        state: present
+        filename: jenkins
+ 
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+      ---
+- name: Install Jenkins on Ubuntu servers
+  hosts: jenkins-servers
+  become: yes
+  tasks:
+    - name: Install Java (required for Jenkins)
+      apt:
+        name: openjdk-17-jdk
+        state: present
+        update_cache: yes
+ 
+    - name: Download Jenkins GPG key
+      get_url:
+        url: https://pkg.jenkins.io/debian/jenkins.io-2023.key
+        dest: /usr/share/keyrings/jenkins-keyring.asc
+        mode: '0644'
+ 
+    - name: Add Jenkins apt repository
+      apt_repository:
+        repo: "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian binary/"
+        state: present
+        filename: jenkins
+ 
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+    ---
+- name: Install Jenkins on Ubuntu servers
+  hosts: jenkins-servers
+  become: yes
+  tasks:
+    - name: Install Java (required for Jenkins)
+      apt:
+        name: openjdk-17-jdk
+        state: present
+        update_cache: yes
+ 
+    - name: Download Jenkins GPG key
+      get_url:
+        url: https://pkg.jenkins.io/debian/jenkins.io-2023.key
+        dest: /usr/share/keyrings/jenkins-keyring.asc
+        mode: '0644'
+ 
+    - name: Add Jenkins apt repository
+      apt_repository:
+        repo: "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian binary/"
         state: present
         filename: jenkins
  
@@ -24,6 +78,33 @@
       apt:
         update_cache: yes
  
+---
+- name: Install Jenkins on Ubuntu servers
+  hosts: jenkins-servers
+  become: yes
+  tasks:
+    - name: Install Java (required for Jenkins)
+      apt:
+        name: openjdk-17-jdk
+        state: present
+        update_cache: yes
+ 
+    - name: Download Jenkins GPG key
+      get_url:
+        url: https://pkg.jenkins.io/debian/jenkins.io-2023.key
+        dest: /usr/share/keyrings/jenkins-keyring.asc
+        mode: '0644'
+ 
+    - name: Add Jenkins apt repository
+      apt_repository:
+        repo: "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian binary/"
+        state: present
+        filename: jenkins
+ 
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        
     - name: Install Jenkins
       apt:
         name: jenkins
@@ -34,8 +115,6 @@
         name: jenkins
         enabled: yes
         state: started
-      register: jenkins_status
-      failed_when: jenkins_status.failed and "'Unit jenkins.service could not be found.' in jenkins_status.msg"
  
     - name: Print Jenkins service status
       command: systemctl status jenkins
@@ -44,3 +123,5 @@
  
     - debug:
         var: result.stdout_lines
+
+ 
