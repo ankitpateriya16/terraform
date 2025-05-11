@@ -1,4 +1,4 @@
-pipeline {
+ pipeline {
   agent any
 
   environment {
@@ -23,11 +23,14 @@ pipeline {
        steps {
          withCredentials([string(credentialsId: 'aws_access_key', variable: 'AWS_ACCESS_KEY'), string(credentialsId: 'aws-secret-key', variable: 'AWS_SECRET_KEY')]) {
                 sh '''
+                  export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY
+                  export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_KEY
+                  export AWS_REGION=us-east-1
                   cd terraform
                   terraform init
-                  terraform apply -auto-approve \
-                  -var="aws_access_key=$AWS_ACCESS_KEY" \
-                  -var="aws_secret_key=$AWS_SECRET_KEY"
+                  terraform plan
+                  terraform apply -auto-approve
+                 
                 '''
     }
   }
