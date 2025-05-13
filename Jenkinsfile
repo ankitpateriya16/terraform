@@ -48,24 +48,26 @@
 }
     stage('Generate Ansible Inventory') {
       steps {
-        sh '''
-          mkdir -p ansible
-          cd terraform
-          IP1=$(terraform output -raw public_ip_1)
-          IP2=$(terraform output -raw public_ip_2)
-          cd ..
-          cat <<EOF > ansible/hosts.ini
-[web]
-$IP1 ansible_user=ubuntu ansible_ssh_private_key_file=../pem/my-key.pem
-$IP2 ansible_user=ubuntu ansible_ssh_private_key_file=../pem/my-key.pem
-EOF
+          sh '''
+            mkdir -p ansible
+            cd terraform
+ 
+            # Get all IPs as a list and store them
+            terraform output -json public_ips | jq -r '.[]' > public_ips.txt
+ 
+            cd ..
+            echo "[jenkins-servers]" > ansible/hosts.ini
+ 
+            while read ip; do
+                echo "$ip ansible_user=ubuntu ansible_ssh_private_key_file=../pem/my-key.pem" >> ansible/hosts.ini
+            done < terraform/public_ips.txt
         '''
       }
     }
     stage('Run Ansible Playbook') {
       steps {
         sh '''
-          ansible-playbook -i ansible/hosts.ini ansible/playbook.yml
+          ansible-playbook -i ansible/hosts.ini  install-jenkins.yaml
         '''
       }
     }
