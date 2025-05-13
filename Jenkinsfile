@@ -1,4 +1,4 @@
- pipeline {
+  pipeline {
   agent any
 
   environment {
@@ -21,7 +21,7 @@
   
     stage('Terraform Apply') {
        steps {
-         withCredentials([string(credentialsId: 'aws_access_key', variable: 'AWS_ACCESS_KEY'), string(credentialsId: 'aws-secret-key', variable: 'AWS_SECRET_KEY')]) {
+         withCredentials([string(credentialsId: 'aws-access-key', variable: 'AWS_ACCESS_KEY'), string(credentialsId: 'aws-secret-key', variable: 'AWS_SECRET_KEY')]) {
                 sh '''
                   export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY
                   export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_KEY
@@ -59,7 +59,7 @@
             echo "[jenkins-servers]" > ansible/hosts.ini
  
             while read ip; do
-                echo "$ip ansible_user=ubuntu ansible_ssh_private_key_file=../pem/my-key.pem" >> ansible/hosts.ini
+                echo "$ip ansible_user=ubuntu ansible_ssh_private_key_file=$WORKSPACE/pem/my-key.pem" >> ansible/hosts.ini
             done < terraform/public_ips.txt
         '''
       }
@@ -67,7 +67,7 @@
     stage('Run Ansible Playbook') {
       steps {
         sh '''
-          ansible-playbook -i ansible/hosts.ini  install-jenkins.yaml
+          ansible-playbook -i ansible/hosts.ini  terraform/install-jenkins.yaml
         '''
       }
     }
