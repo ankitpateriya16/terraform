@@ -1,0 +1,84 @@
+---
+- name: Install Jenkins on Ubuntu servers
+  hosts: jenkins-servers
+  become: yes
+  tasks:
+    - name: Install Java (required for Jenkins)
+      apt:
+        name: openjdk-21-jdk
+        state: present
+        update_cache: yes
+ 
+    - name: Download Jenkins GPG key
+      get_url:
+        url: https://pkg.jenkins.io/debian/jenkins.io-2023.key
+        dest: /usr/share/keyrings/jenkins-keyring.asc
+        mode: '0644'
+ 
+    - name: Add Jenkins apt repository
+      apt_repository:
+        repo: "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian binary/"
+        state: present
+        filename: jenkins
+ 
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        
+    - name: Install Jenkins
+      apt:
+        name: jenkins
+        state: present
+ 
+    - name: Ensure Jenkins is started and enabled
+      systemd:
+        name: jenkins
+        enabled: yes
+        state: started
+ 
+    - name: Print Jenkins service status
+      command: systemctl status jenkins
+      register: result
+      ignore_errors: true
+ 
+    - debug:
+        var: result.stdout_lines
+
+- name: Install Docker on Docker Servers
+  hosts: docker
+  become: yes
+  tasks:
+    - name: Install packages
+      apt:
+        name: [apt-transport-https, ca-certificates, curl, gnupg-agent, software-properties-common]
+        update_cache: yes
+ 
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+ 
+    - name: Add Docker repository
+      apt_repository:
+        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable
+        state: present
+ 
+    - name: Install Docker
+      apt:
+        name: [docker-ce, docker-ce-cli, containerd.io]
+        update_cache: yes
+ 
+    - name: Start and enable Docker
+      systemd:
+        name: docker
+        enabled: yes
+        state: started
+
+- name: Install Ansible on Dev Server
+  hosts: dev
+  become: yes
+  tasks:
+    - name: Install Ansible
+      apt:
+        name: ansible
+        update_cache: yes
