@@ -12,7 +12,11 @@ sudo ./aws/install
 
 aws --version 
 
-AWS configure   --- # add access key, sectret key and region 
+AWS configure   --- # add access key, sectret key and region else use export cmd
+
+export AWS_ACCESS_KEY_ID="your-access-key-id"
+export AWS_SECRET_ACCESS_KEY="your-secret-access-key"
+export AWS_DEFAULT_REGION="your-region"
 
 git clone https://github.com/ankitpateriya16/terraform
 
